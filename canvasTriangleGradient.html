@@ -7,8 +7,7 @@
     Change 'resolution', 'sizeSquare' and
     'aliasing' to set performance/quality
 
-    Use aliasing with non transparent
-    triangles to improve joints
+    Use aliasing to improve joints
 
     This is how it works:
         - Create one image with the gradient
@@ -42,6 +41,7 @@
                     sideGradient1 = new Array(sizeArray),
                     x = 0, y = 0;
 
+                // Returns an array of colors with the gradient c0-c1
                 var getGradient = function(c0, c1, steps) {
 
                     var gR = 0, gG = 0, gB = 0, gA = 0, 
@@ -83,6 +83,7 @@
                 sideGradient0 = getGradient(c0, c2, sizeArray);
                 sideGradient1 = getGradient(c1, c2, sizeArray);
 
+                // Draw texture
                 for (y = 0; y < sizeArray; y = y + 1) {
 
                     var gradient = getGradient(sideGradient0[y], sideGradient1[y], sizeArray - y),
