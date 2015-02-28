@@ -13,7 +13,7 @@ cd html-examples
 
 ### canvasTriangleGradient.js
 
-HTML5 + Javascript example showing how to draw one triangle with 3 colors gradient
+HTML5 + Javascript example showing how to draw one canvas triangle with 3 colors gradient
 
 ![canvasTriangleGradient0](https://raw.github.com/optimisme/html-examples/master/captures/canvasTriangleGradient0.png)
 
