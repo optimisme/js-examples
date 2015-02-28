@@ -1,0 +1,163 @@
+<html>
+<!--
+
+    This is an example showing how to draw
+    3 color gradients for canvas triangles
+
+    This is how it works:
+        - Create one image with the gradient
+        - Project the resulting texture
+        - Change 'resolution' and 'sizeSquare'
+          to set performance/quality
+  -->
+	<head>
+		<title>Test</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+        <canvas id='cns' width='300' height='300'
+                style="display: block; height: 300px; width: 300px;"></canvas>
+		<script>
+            const trPosition = function (x, y) { this.x = x; this.y = y; }
+            const trDraw = function (ctx, p0, p1, p2, c0, c1, c2) {
+
+                // Set resolution
+                var resolution = 500,   // Multiple of 100
+                    sizeSquare = 10,    // Multiple of 10
+                    sizeArray = resolution / sizeSquare,
+                    sideGradient0 = new Array(sizeArray),
+                    sideGradient1 = new Array(sizeArray),
+                    x = 0, y = 0;
+
+                var getGradient = function(c0, c1, steps) {
+
+                    var gR = 0, gG = 0, gB = 0, gA = 0, 
+                        x = 0, out = new Array(steps); 
+
+                    gR = (c0[0] > c1[0]) ? -(c0[0] - c1[0]) : (c1[0] - c0[0]);
+                    gG = (c0[1] > c1[1]) ? -(c0[1] - c1[1]) : (c1[1] - c0[1]);
+                    gB = (c0[2] > c1[2]) ? -(c0[2] - c1[2]) : (c1[2] - c0[2]);
+                    gA = (c0[3] > c1[3]) ? -(c0[3] - c1[3]) : (c1[3] - c0[3]);
+
+                    gR = gR / steps;
+                    gG = gG / steps;
+                    gB = gB / steps;
+                    gA = gA / steps;
+
+                    for (x = 0; x < steps; x = x + 1) {
+                        out[x] = [
+                            parseInt(c0[0] + gR * x, 10),
+                            parseInt(c0[1] + gG * x, 10), 
+                            parseInt(c0[2] + gB * x, 10),
+                            c0[3] + gA * x 
+                        ];
+                    }
+
+                    return out;
+                }
+
+                // Draw texture from colors array
+                var texCanvas = document.createElement('canvas');
+                texCanvas.width = resolution;
+                texCanvas.height = resolution;
+                texCanvas.style.width = resolution + 'px';
+                texCanvas.style.height = resolution + 'px';
+                
+                var texCtx = texCanvas.getContext('2d');
+                texCtx.clearRect(0, 0, resolution, resolution);
+
+                // Get side gradients
+                sideGradient0 = getGradient(c0, c2, sizeArray);
+                sideGradient1 = getGradient(c1, c2, sizeArray);
+
+                for (y = 0; y < sizeArray; y = y + 1) {
+
+                    var gradient = getGradient(sideGradient0[y], sideGradient1[y], sizeArray - y),
+                        posY = y * sizeSquare,
+                        limit = gradient.length - 1;
+
+                    for (x = 0; x < gradient.length; x = x + 1) {
+                        var R = gradient[x][0],
+                            G = gradient[x][1],
+                            B = gradient[x][2],
+                            A = gradient[x][3],
+                            posX = x * sizeSquare;
+
+                        texCtx.fillStyle = 'rgba(' + R + ',' + G + ',' +  B + ',' + A +')';
+                        if (x < limit) {
+                            texCtx.fillRect(posX, posY, sizeSquare, sizeSquare);
+                        } else {
+                            texCtx.beginPath();
+                            texCtx.moveTo(posX, posY);
+                            texCtx.lineTo(posX + sizeSquare, posY);
+                            texCtx.lineTo(posX, posY + sizeSquare);
+                            texCtx.closePath();
+                            texCtx.fill();
+                        }
+                    }
+                }
+
+                // Get the projection
+                var x0 = p0.x, y0 = p0.y,
+                    x1 = p1.x, y1 = p1.y,
+                    x2 = p2.x, y2 = p2.y,
+                    u0 = 0, v0 = 0,
+                    u1 = resolution, v1 = 0,
+                    u2 = 0, v2 = resolution;
+
+                x1 -= x0; y1 -= y0; 
+                x2 -= x0; y2 -= y0; 
+                u1 -= u0; v1 -= v0;
+                u2 -= u0; v2 -= v0;
+ 
+                var id = 1.0 / (u1 * v2 - u2 * v1);
+                var a = id * (v2 * x1 - v1 * x2);
+                var b = id * (v2 * y1 - v1 * y2);
+                var c = id * (u1 * x2 - u2 * x1);
+                var d = id * (u1 * y2 - u2 * y1);
+                var e = x0 - a * u0 - c * v0;
+                var f = y0 - b * u0 - d * v0;
+
+                // Draw texture to destination
+                ctx.save();
+                ctx.transform(a, b, c, d, e, f);
+                ctx.drawImage(texCanvas, 0, 0);
+                ctx.restore();
+
+                // Remove:
+                // document.body.appendChild(texCanvas);
+            };
+
+            var canvas = document.getElementById("cns");
+            var ctx = canvas.getContext("2d");
+
+            var p0 = new trPosition(50, 50);
+            var p1 = new trPosition(25, 125);
+            var p2 = new trPosition(75, 125);
+            var tr0 = trDraw(ctx, p0, p1, p2, [255, 0, 0, 1], [0, 255, 0, 1], [0, 0, 255, 1]);
+
+            var p3 = new trPosition(200, 25);
+            var p4 = new trPosition(175, 125);
+            var p5 = new trPosition(125, 150);
+            var tr1 = trDraw(ctx, p3, p4, p5, [255, 0, 0, 1], [0, 255, 0, 1], [0, 0, 255, 1]);
+
+            var p6 = new trPosition(200, 25);
+            var p7 = new trPosition(175, 125);
+            var p8 = new trPosition(225, 175);
+            var tr2 = trDraw(ctx, p6, p7, p8, [255, 0, 0, 1], [0, 255, 0, 1], [0, 0, 255, 1]);
+
+            var p9 = new trPosition(175, 125);
+            var p10 = new trPosition(125, 150);
+            var p11 = new trPosition(225, 175);
+            var tr3 = trDraw(ctx, p9, p10, p11, [0, 255, 0, 1], [0, 0, 255, 1], [0, 0, 255, 1]);
+
+            var p12 = new trPosition(50, 150);
+            var p13 = new trPosition(25, 175);
+            var p14 = new trPosition(75, 200);
+            var tr4 = trDraw(ctx, p12, p13, p14, [0, 0, 0, 0], [0, 255, 0, 1], [0, 0, 255, 1]);
+		</script>
+	</body>
+</html>
