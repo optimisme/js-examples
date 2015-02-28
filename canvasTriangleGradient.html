@@ -25,16 +25,16 @@
                 style="display: block; height: 300px; width: 300px;"></canvas>
 		<script>
             const trSettings = function (resolution, square, aliasing) {
-                this.resolution = resolution,
-                this.square = square,
+                this.resolution = resolution,   // Multiple of 100
+                this.square = square,           // Multiple of 10 and < resolution
                 this.aliasing = aliasing
             }
             const trPosition = function (x, y) { this.x = x; this.y = y; }
             const trDraw = function (ctx, p0, p1, p2, c0, c1, c2, settings) {
 
                 // Set resolution
-                var resolution = settings.resolution,   // Multiple of 100
-                    sizeSquare = settings.square,       // Multiple of 10
+                var resolution = settings.resolution,
+                    sizeSquare = settings.square,
                     aliasing = settings.aliasing,
                     sizeArray = resolution / sizeSquare,
                     sideGradient0 = new Array(sizeArray),
