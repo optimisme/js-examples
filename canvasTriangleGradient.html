@@ -5,16 +5,14 @@
     3 color gradients on canvas triangles
 
     Change 'resolution', 'sizeSquare' and
-    'aliasing' to set performance/quality
-
-    Use aliasing to improve joints
+    to set performance/quality
 
     This is how it works:
-        - Create one image with the gradient
+        - Create one texture with the gradient
         - Project the resulting texture
   -->
 	<head>
-		<title>Test</title>
+		<title></title>
 		<style>
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
@@ -24,17 +22,10 @@
         <canvas id='cns' width='300' height='300'
                 style="display: block; height: 300px; width: 300px;"></canvas>
 		<script>
-            const trSettings = function (resolution, square) {
-                this.resolution = resolution;   // Multiple of 100
-                this.square = square;           // Multiple of 10 and < resolution
-            }
-            const trPosition = function (x, y) { this.x = x; this.y = y; }
-            const trDraw = function (ctx, p0, p1, p2, c0, c1, c2, settings) {
+            const trDraw = function (ctx, p0, p1, p2, resolution, sizeSquare) {
 
                 // Set resolution
-                var resolution = settings.resolution,
-                    sizeSquare = settings.square,
-                    sizeArray = resolution / sizeSquare,
+                var sizeArray = resolution / sizeSquare,
                     sideGradient0 = new Array(sizeArray),
                     sideGradient1 = new Array(sizeArray),
                     x = 0, y = 0;
@@ -45,10 +36,10 @@
                     var gR = 0, gG = 0, gB = 0, gA = 0, 
                         x = 0, out = new Array(steps); 
 
-                    gR = (c0[0] > c1[0]) ? -(c0[0] - c1[0]) : (c1[0] - c0[0]);
-                    gG = (c0[1] > c1[1]) ? -(c0[1] - c1[1]) : (c1[1] - c0[1]);
-                    gB = (c0[2] > c1[2]) ? -(c0[2] - c1[2]) : (c1[2] - c0[2]);
-                    gA = (c0[3] > c1[3]) ? -(c0[3] - c1[3]) : (c1[3] - c0[3]);
+                    gR = (c0.r > c1.r) ? -(c0.r - c1.r) : (c1.r - c0.r);
+                    gG = (c0.g > c1.g) ? -(c0.g - c1.g) : (c1.g - c0.g);
+                    gB = (c0.b > c1.b) ? -(c0.b - c1.b) : (c1.b - c0.b);
+                    gA = (c0.a > c1.a) ? -(c0.a - c1.a) : (c1.a - c0.a);
 
                     gR = gR / steps;
                     gG = gG / steps;
@@ -56,12 +47,12 @@
                     gA = gA / steps;
 
                     for (x = 0; x < steps; x = x + 1) {
-                        out[x] = [
-                            parseInt(c0[0] + gR * x, 10),
-                            parseInt(c0[1] + gG * x, 10), 
-                            parseInt(c0[2] + gB * x, 10),
-                            c0[3] + gA * x 
-                        ];
+                        out[x] = {
+                            r: parseInt(c0.r + gR * x, 10),
+                            g: parseInt(c0.g + gG * x, 10), 
+                            b: parseInt(c0.b + gB * x, 10),
+                            a: c0.a + gA * x 
+                        };
                     }
 
                     return out;
@@ -78,8 +69,8 @@
                 texCtx.clearRect(0, 0, resolution, resolution);
 
                 // Get side gradients
-                sideGradient0 = getGradient(c0, c2, sizeArray);
-                sideGradient1 = getGradient(c1, c2, sizeArray);
+                sideGradient0 = getGradient({ r: p0.r, g: p0.g, b: p0.b, a: p0.a }, { r: p2.r, g: p2.g, b: p2.b, a: p2.a }, sizeArray);
+                sideGradient1 = getGradient({ r: p1.r, g: p1.g, b: p1.b, a: p1.a }, { r: p2.r, g: p2.g, b: p2.b, a: p2.a }, sizeArray);
 
                 // Draw texture
                 for (y = 0; y < sizeArray; y = y + 1) {
@@ -89,10 +80,10 @@
                         limit = gradient.length - 1;
 
                     for (x = 0; x < gradient.length; x = x + 1) {
-                        var R = gradient[x][0],
-                            G = gradient[x][1],
-                            B = gradient[x][2],
-                            A = gradient[x][3],
+                        var R = gradient[x].r,
+                            G = gradient[x].g,
+                            B = gradient[x].b,
+                            A = gradient[x].a,
                             posX = x * sizeSquare;
 
                         texCtx.fillStyle = 'rgba(' + R + ',' + G + ',' +  B + ',' + A +')';
@@ -137,22 +128,19 @@
                 // document.body.appendChild(texCanvas);
             };
 
-            var canvas = document.getElementById("cns");
-            var ctx = canvas.getContext("2d");
+            var canvas = document.getElementById("cns"),
+				ctx = canvas.getContext("2d"),
+				p0 = { x: 75, y: 50, r:255, g:  0, b:  0, a: 1 },
+				p1 = { x: 25, y:125, r:  0, g:255, b:  0, a: 1 },
+				p2 = { x:125, y:125, r:  0, g:  0, b:255, a: 1 },
 
-            var st = new trSettings(300, 10);
+				p3 = { x:200, y: 25, r:255, g:255, b:255, a: 0 },
+				p4 = { x:150, y:150, r:  0, g:255, b:  0, a: 1 },
+				p5 = { x:250, y:100, r:  0, g:  0, b:255, a: 1 };
 
-            var p0 = new trPosition(75, 50);
-            var p1 = new trPosition(25, 125);
-            var p2 = new trPosition(125, 125);
-            trDraw(ctx, p0, p1, p2, [255, 0, 0, 1], [0, 255, 0, 1], [0, 0, 255, 1], st);
+            trDraw(ctx, p0, p1, p2, 300, 10);
+            trDraw(ctx, p3, p4, p5, 500, 10);
 
-            st = new trSettings(500, 10);
-
-            var p3 = new trPosition(200, 25);
-            var p4 = new trPosition(150, 150);
-            var p5 = new trPosition(250, 100);
-            trDraw(ctx, p3, p4, p5, [0, 0, 0, 0], [0, 255, 0, 1], [0, 0, 255, 1], st);
 		</script>
 	</body>
 </html>
