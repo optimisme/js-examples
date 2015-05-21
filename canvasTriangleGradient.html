@@ -24,10 +24,9 @@
         <canvas id='cns' width='300' height='300'
                 style="display: block; height: 300px; width: 300px;"></canvas>
 		<script>
-            const trSettings = function (resolution, square, aliasing) {
-                this.resolution = resolution,   // Multiple of 100
-                this.square = square,           // Multiple of 10 and < resolution
-                this.aliasing = aliasing
+            const trSettings = function (resolution, square) {
+                this.resolution = resolution;   // Multiple of 100
+                this.square = square;           // Multiple of 10 and < resolution
             }
             const trPosition = function (x, y) { this.x = x; this.y = y; }
             const trDraw = function (ctx, p0, p1, p2, c0, c1, c2, settings) {
@@ -35,7 +34,6 @@
                 // Set resolution
                 var resolution = settings.resolution,
                     sizeSquare = settings.square,
-                    aliasing = settings.aliasing,
                     sizeArray = resolution / sizeSquare,
                     sideGradient0 = new Array(sizeArray),
                     sideGradient1 = new Array(sizeArray),
@@ -132,12 +130,7 @@
                 // Draw texture to destination
                 ctx.save();
                 ctx.transform(a, b, c, d, e, f);
-                if (!aliasing) {
-                    ctx.drawImage(texCanvas, 0, 0);
-                } else {
-                    ctx.drawImage(texCanvas, +0.5, +0.5);
-                    ctx.drawImage(texCanvas, -0.5, -0.5);
-                }
+                ctx.drawImage(texCanvas, 0, 0);
                 ctx.restore();
 
                 // Remove:
@@ -147,37 +140,19 @@
             var canvas = document.getElementById("cns");
             var ctx = canvas.getContext("2d");
 
-            var st = new trSettings(300, 10, false);
+            var st = new trSettings(300, 10);
 
-            var p0 = new trPosition(50, 50);
+            var p0 = new trPosition(75, 50);
             var p1 = new trPosition(25, 125);
-            var p2 = new trPosition(75, 125);
-            var tr0 = trDraw(ctx, p0, p1, p2, [255, 0, 0, 1], [0, 255, 0, 1], [0, 0, 255, 1], st);
+            var p2 = new trPosition(125, 125);
+            trDraw(ctx, p0, p1, p2, [255, 0, 0, 1], [0, 255, 0, 1], [0, 0, 255, 1], st);
 
-            st = new trSettings(500, 10, true);
+            st = new trSettings(500, 10);
 
             var p3 = new trPosition(200, 25);
-            var p4 = new trPosition(175, 125);
-            var p5 = new trPosition(125, 150);
-            var tr1 = trDraw(ctx, p3, p4, p5, [255, 0, 0, 1], [0, 255, 0, 1], [0, 0, 255, 1], st);
-
-            var p6 = new trPosition(200, 25);
-            var p7 = new trPosition(175, 125);
-            var p8 = new trPosition(225, 175);
-            var tr2 = trDraw(ctx, p6, p7, p8, [255, 0, 0, 1], [0, 255, 0, 1], [0, 0, 255, 1], st);
-
-            var p9 = new trPosition(175, 125);
-            var p10 = new trPosition(125, 150);
-            var p11 = new trPosition(225, 175);
-            var tr3 = trDraw(ctx, p9, p10, p11, [0, 255, 0, 1], [0, 0, 255, 1], [0, 0, 255, 1], st);
-
-            // Aliasing 'tip' won't work well with transparency
-            st = new trSettings(300, 10, false);
-
-            var p12 = new trPosition(50, 150);
-            var p13 = new trPosition(25, 175);
-            var p14 = new trPosition(75, 200);
-            var tr4 = trDraw(ctx, p12, p13, p14, [0, 0, 0, 0], [0, 255, 0, 1], [0, 0, 255, 1], st);
+            var p4 = new trPosition(150, 150);
+            var p5 = new trPosition(250, 100);
+            trDraw(ctx, p3, p4, p5, [0, 0, 0, 0], [0, 255, 0, 1], [0, 0, 255, 1], st);
 		</script>
 	</body>
 </html>

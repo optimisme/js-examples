@@ -11,9 +11,15 @@ cd html-examples
 
 ...
 
-### canvasTriangleGradient.js
+### canvasTriangleGradient.html
 
-HTML5 + Javascript example showing how to draw one canvas triangle with 3 colors gradient
+Example showing how to draw one 3 gradient triangle using the 'canvas' object and javascript. It is done creating a texture with 3 colors triangle, and projecting this texture to its final position. The resolution of the texture can be configured to improve performance/quality, it also allows the use of RGBA colors.
+
+![canvasTriangleGradient0](https://raw.github.com/optimisme/html-examples/master/captures/canvasTriangleGradient0.png)
+
+### simplifyToNumber.html
+
+Inspired by [simplify.js](http://mourner.github.io/simplify-js/) this example shows how to 'Simplify' a polyline defining the final number of points instead of the tolerance. The algorithm is a modification of [Douglas-Peucker](http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm) algorithm.
 
 ![canvasTriangleGradient0](https://raw.github.com/optimisme/html-examples/master/captures/canvasTriangleGradient0.png)
 

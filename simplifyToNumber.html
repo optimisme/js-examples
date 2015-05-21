@@ -1,0 +1,304 @@
+<html>
+<script>
+var Simplify = function () {
+        'use strict';
+        this.limit = 0;
+        this.arrData = [];
+        this.arrSteps = [];
+    };
+
+Simplify.prototype.compute = function (limit, arr) {
+    'use strict';
+    this.limit = limit - 1;
+    this.arrData = arr;
+    this.arrSteps = [[0, arr.length - 1]];
+
+    if (this.arrData.length <= this.limit) {
+        return arr;
+    } else {
+        return this.simplifyArr();
+    }
+};
+
+Simplify.prototype.getSqSegDist = function (p, p1, p2) {
+    'use strict';
+    var x = p1[0],
+        y = p1[1],
+        dx = p2[0] - x,
+        dy = p2[1] - y,
+        t = 0;
+
+    if (dx !== 0 || dy !== 0) {
+
+        t = ((p[0] - x) * dx + (p[1] - y) * dy) / (dx * dx + dy * dy);
+
+        if (t > 1) {
+            x = p2[0];
+            y = p2[1];
+
+        } else if (t > 0) {
+            x += dx * t;
+            y += dy * t;
+        }
+    }
+
+    dx = p[0] - x;
+    dy = p[1] - y;
+
+    return dx * dx + dy * dy;
+};
+
+Simplify.prototype.getMaximumStepDistance = function (begin, end) {
+    'use strict';
+    var distance = 0,
+        maxObj = {distance: 0, pos: begin},
+        pos = begin;
+
+    for (pos = begin; pos < end; pos = pos + 1) {
+        distance = this.getSqSegDist([this.arrData[pos][0], this.arrData[pos][1]],
+                                     [this.arrData[begin][0], this.arrData[begin][1]],
+                                     [this.arrData[end][0], this.arrData[end][1]]);
+
+        if (distance > maxObj.distance) {
+            maxObj.distance = distance;
+            maxObj.pos = pos;
+        }
+    }
+    return maxObj;
+};
+
+Simplify.prototype.addNextStep = function () {
+    'use strict';
+    var step = 0,
+        maxObj = {distance: 0, position: 0, step: 0},
+        distance = 0,
+        stepObj,
+        ref;
+
+    for (step = 0; step < this.arrSteps.length; step = step + 1) {
+        stepObj = this.getMaximumStepDistance(this.arrSteps[step][0], this.arrSteps[step][1]);
+        if (stepObj.distance > maxObj.distance) {
+            maxObj.distance = stepObj.distance;
+            maxObj.position = stepObj.pos;
+            maxObj.step = step;
+        }
+    }
+
+    ref = this.arrSteps[maxObj.step];
+    this.arrSteps = this.arrSteps.slice(0, maxObj.step).concat([[ref[0], maxObj.position]]).concat([[maxObj.position, ref[1]]]).concat(this.arrSteps.slice(maxObj.step + 1));
+};
+
+Simplify.prototype.buildResult = function () {
+    'use strict';
+    var step = 0,
+        stepLimit = this.arrSteps.length,
+        stepLast = stepLimit - 1,
+        rst = [],
+        ref;
+
+    for (step = 0; step < stepLimit; step = step + 1) {
+
+        ref = this.arrSteps[step][0];
+        rst.push(this.arrData[ref]);
+
+        if (step === stepLast) {
+            ref = this.arrSteps[step][1];
+            rst.push(this.arrData[ref]);
+        }
+    }
+
+    return rst;
+};
+
+Simplify.prototype.simplifyArr = function () {
+    'use strict';
+    while (this.arrSteps.length < this.limit) {
+        this.addNextStep();
+    }
+    return this.buildResult();
+};
+
+var draw = function (id, arr) {
+    'use strict';
+    var height = 250,
+        width = 370,
+        minX,
+        maxX,
+        minY,
+        maxY,
+        diffX = 0.0,
+        diffY = 0.0,
+        counter = 0,
+        x = 0.0,
+        y = 0.0,
+        cnv = document.getElementById(id),
+        ctx = cnv.getContext("2d"),
+        position = [0.0, 0.0],
+        getPosition = function (x, y) {
+            var rst = { x: 0.0, y: 0.0 };
+            rst.x = (x * width / diffX) - (minX * width / diffX);
+            rst.y = height - ((y *  height / diffY) - (minY *  height / diffY));
+            return rst;
+        };
+
+    for (counter = 0; counter < arr.length; counter = counter + 1) {
+        x = arr[counter][0];
+        y = arr[counter][1];
+        if (typeof minX === 'undefined' || x < minX) {
+            minX = x;
+        }
+        if (typeof minY === 'undefined' || y < minY) {
+            minY = y;
+        }
+        if (typeof maxX === 'undefined' || x > maxX) {
+            maxX = x;
+        }
+        if (typeof maxY === 'undefined' || y > maxY) {
+            maxY = y;
+        }
+    }
+
+    diffX = maxX - minX;
+    diffY = maxY - minY;
+
+    ctx.beginPath();
+    ctx.clearRect (0 , 0 , width, height);
+
+    ctx.font="18px Arial";
+    ctx.fillText(arr.length + ' points', 10, 20);
+
+    position = getPosition(arr[0][0], arr[0][1]);
+    ctx.moveTo(position.x, position.y);
+    for (counter = 1; counter < arr.length; counter = counter + 1) {
+        position = getPosition(arr[counter][0], arr[counter][1]);
+        ctx.lineTo(position.x, position.y);
+    }
+    ctx.stroke();
+    for (counter = 1; counter < arr.length; counter = counter + 1) {
+        position = getPosition(arr[counter][0], arr[counter][1]);
+        ctx.beginPath();
+        ctx.arc(position.x, position.y, 2, 0, 2 * Math.PI, false);
+        ctx.fill();
+    }
+};
+
+var add = function () {
+    'use strict';
+    if (limit < arr.length) {
+        limit = limit + 1;
+        redraw();
+    }
+};
+
+var sub = function () {
+    'use strict';
+    if (limit > 3) {
+        limit = limit - 1;
+        redraw();
+    }
+};
+
+var checkKey = function (e) {
+	'use strict';
+	e = e || window.event;
+	if (e.keyCode == '38') {
+        add();
+    }
+    else if (e.keyCode == '40') {
+        sub();
+    }
+    else if (e.keyCode == '37') {
+     	sub();
+    }
+    else if (e.keyCode == '39') {
+       	add();
+    }
+}
+document.onkeydown = checkKey;
+
+var arr = [
+        [100, 0.10],
+        [101, 0.15],
+        [102, 0.35],
+        [103, 0.75],
+        [104, 0.65],
+        [105, 0.80],
+        [106, 0.30],
+        [107, 0.40],
+        [108, 0.32],
+        [109, 0.30],
+        [110, 0.10],
+        [111, 0.08],
+        [112, 0.12],
+        [113, 0.17],
+        [114, 0.16],
+        [115, 0.45],
+        [116, 0.50],
+        [117, 0.45],
+        [118, 0.55],
+        [119, 0.60],
+        [120, 0.62],
+        [121, 0.65],
+        [122, 0.74],
+        [123, 0.70],
+        [124, 0.80],
+        [125, 0.85],
+        [126, 0.95],
+        [127, 0.70],
+        [128, 0.60],
+        [129, 0.50],
+        [130, 0.15],
+        [131, 0.25],
+        [132, 0.15],
+        [133, 0.55],
+        [134, 0.65],
+        [135, 0.70],
+        [136, 0.60],
+        [137, 0.50],
+        [138, 0.82],
+        [139, 0.90],
+        [140, 0.50],
+        [141, 0.38],
+        [142, 0.32],
+        [143, 0.37],
+        [144, 0.36],
+        [145, 0.45],
+        [146, 0.50],
+        [147, 0.35],
+        [148, 0.25],
+        [149, 0.20],
+        [150, 0.22],
+        [151, 0.15],
+        [152, 0.34],
+        [153, 0.20],
+        [154, 0.50],
+        [155, 0.85],
+        [156, 0.65],
+        [157, 0.50],
+        [158, 0.40],
+        [159, 0.30],
+        [160, 0.15]
+    ],
+    limit = parseInt(arr.length / 2, 10),
+    redraw = function () {
+        window.requestAnimationFrame(function (time) {
+            var smpfy = new Simplify(),
+                rst = smpfy.compute(limit, arr);
+
+            draw('original', arr);
+            draw('simplified', rst);
+        });
+    };
+</script>
+<body onload='redraw()'>
+<div style='margin: auto; width: 750px;'>
+    <canvas id='original' height='250' width='370' style='border: 1px solid #aaa; height: 250px; width: 370px;'></canvas>
+    <div style='float: right; text-align: center; width: 370px;'>
+        <canvas id='simplified' height='250' width='370' style='border: 1px solid #aaa; height: 250px; width: 370px;'></canvas>
+        <input type='button' value='-1' onclick='sub()'/>
+        <input type='button' value='+1' onclick='add()'/>
+    </div>
+	*Use 'left',  'right' keys to change the number of points.
+</div>
+</body>
+</html>
