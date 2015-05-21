@@ -19,7 +19,7 @@ Example showing how to draw one 3 gradient triangle using the 'canvas' object an
 
 ### scrollAnimation.html
 
-This example show how to animate various HTML div objects, depending on the scroll position.
+This example show how to animate one or various HTML div objects, depending on the scroll position.
 
 ### simplifyToNumber.html
 
