@@ -17,6 +17,10 @@ Example showing how to draw one 3 gradient triangle using the 'canvas' object an
 
 ![canvasTriangleGradient0](https://raw.github.com/optimisme/html-examples/master/captures/canvasTriangleGradient0.png)
 
+### scrollAnimation.html
+
+This example show how to animate various HTML div objects, depending on the scroll position.
+
 ### simplifyToNumber.html
 
 Inspired by [simplify.js](http://mourner.github.io/simplify-js/) this example shows how to 'Simplify' a polyline defining the final number of points instead of the tolerance. The algorithm is a modification of [Douglas-Peucker](http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm) algorithm.

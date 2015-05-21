@@ -1,0 +1,63 @@
+<html>
+<style>
+.scrollA {
+    background: #0af;
+    height: 175%;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 5px;
+}
+.scrollB {
+    background: #0cf;
+    height: 100%;
+    left: 5px;
+    top: 0px;
+    width: 5px;
+}
+#content {
+    border: #bdbdbd thin solid;
+    box-shadow: -1px 2px 8px 0px rgba(220,220,220,1);
+    height: 250px;
+    margin: 25px;
+    opacity: 0.0;
+    padding:15px;
+    transition: 0.75s;
+    transform: translate3d(150px, 0, 0) rotate3d(0, 0, 1, 0deg) scale3d(1.05, 1.05, 1.05);
+    width: 250;
+}
+</style>
+<script>
+window.onscroll = function (evt) {
+    var body = document.body,
+        html = document.documentElement,
+        scrollTop = body.scrollTop || html.scrollTop,
+        content = document.getElementById('content'),
+        contentTop = content.offsetTop,
+        documentHeight = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight),
+        windowHeight = window.innerHeight,
+        limit = windowHeight / 2,
+        diff = -(contentTop - windowHeight - scrollTop),
+        relative = function (begin, end, diff, limit) { return begin + (diff * (end - begin) / limit); };
+
+    if (diff < 0) {
+        content.style.opacity = 0;
+        content.style.transform = 'translate3d(150px, 0, 0) rotate3d(0, 0, 1, 0.0deg) scale3d(1.1, 1.1, 1.00)';
+    } else if (diff > limit) {
+        content.style.opacity = 1;
+        content.style.transform = 'translate3d(150px, 0, 0) rotate3d(0, 0, 1,-2.5deg) scale3d(1.0, 1.0, 0.15)';
+    } else {
+        content.style.opacity = diff / limit;
+        content.style.transform = 'translate3d(150px, 0, 0) '
+            + 'rotate3d(0, 0, 1, ' + relative(0, -2.5, diff, limit) + 'deg)'
+            + 'scale3d(' + relative(1.1, 1.0, diff, limit) + ', ' + relative(1.1, 1.0, diff, limit) + ', ' + relative(1, 0.15, diff, limit) + ')';
+    }
+}
+</script>
+<body>
+Scroll down ...
+<div class='scrollA'></div>
+<div class='scrollB'></div>
+<div id='content'>&nbsp;</div>
+</body>
+</html>
