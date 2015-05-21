@@ -13,7 +13,7 @@ cd html-examples
 
 ### canvasTriangleGradient.html
 
-Example showing how to draw one 3 gradient triangle using the 'canvas' object and javascript. It is done creating a texture with 3 colors triangle, and projecting this texture to its final position. The resolution of the texture can be configured to improve performance/quality, it also allows the use of RGBA colors.
+Example showing how to draw one 3 gradient triangle using the 'canvas' object and javascript. It is done creating a triangle texture with 3 colors, and projecting this texture to its final position. The resolution of the texture can be configured to improve performance/quality, it also allows the use of RGBA colors.
 
 ![canvasTriangleGradient0](https://raw.github.com/optimisme/html-examples/master/captures/canvasTriangleGradient0.png)
 
