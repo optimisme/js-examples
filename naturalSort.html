@@ -1,0 +1,117 @@
+<html>
+<style>
+.half {
+    float: left;
+    width: 50%;
+}
+</style>
+<script>
+var arr = [
+        "AAB",
+        "P 10",
+        "P 8",
+        "DEC0",
+        "P 9 a 100",
+        "P 9 a 98",
+        "DEC10",
+        "P 10 b 1001",
+        "P 9 a 98",
+        "P 10 b 999",
+        "P 9 a 99",
+        "DEC5",
+        "P 9 a 102",
+        "ABC"
+    ];
+
+var naturalSort = function (a, b) {
+    var aFst = '',
+        bFst = '',
+        aRst = '',
+        bRst = '',
+        aCnt = 0,
+        bCnt = 0,
+        aNum = 0,
+        bNum = 0,
+        aIsNum = false,
+        bIsNum = false,
+        charIsNumber = function (c) {
+            switch (c) {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    if (a.length === 0 && b.length === 0) { return 0; }
+    if (a.length === 0) { return -1; }
+    if (b.length === 0) { return +1; }
+
+    aFst = a.substr(0, 1);
+    bFst = b.substr(0, 1);
+
+    aRst = a.substr(1);
+    bRst = b.substr(1);
+
+    if (charIsNumber(aFst)) { aIsNum = true; }
+    if (charIsNumber(bFst)) { bIsNum = true; }
+
+    if (!aIsNum && !bIsNum) {
+        if (aFst !== bFst) { return a.localeCompare(b); }
+        else { return naturalSort(aRst, bRst); }
+    }
+    if ( aIsNum && !bIsNum) { return -1; }
+    if (!aIsNum && bIsNum) { return +1; }
+
+    while (aFst.length > 0 && !isNaN(aFst)) {
+        aFst = aRst.substr(0, 1);
+        aRst = aRst.substr(1);
+        aCnt = aCnt + 1;
+    }
+
+    while (bFst.length > 0 && !isNaN(bFst)) {
+        bFst = bRst.substr(0, 1);
+        bRst = bRst.substr(1);
+        bCnt = bCnt + 1;
+    }
+
+    aNum = parseInt(a.substr(0, aCnt), 10);
+    bNum = parseInt(b.substr(0, bCnt), 10);
+
+    if (aNum < bNum) { return -1; }
+    if (aNum > bNum) { return +1; }
+
+    return naturalSort(aRst, bRst);
+};
+
+var init = function () {
+    var not = [],
+        str = '',
+        cnt = 0;
+
+    for (cnt = 0; cnt < arr.length; cnt = cnt + 1) {
+        not.push(arr[cnt].toString());
+    }
+
+    arr.sort(naturalSort);
+
+    for (cnt = 0; cnt < arr.length; cnt = cnt + 1) {
+        str = str + '<div class="half">' + not[cnt] + '</div><div class="half">' + arr[cnt] + '</div><br/>';
+    }
+
+    document.getElementById('rst').innerHTML = str;
+};
+</script>
+<body onload='init()'>
+<div id='rst' style='margin: auto; width: 750px;'></div>
+</body>
+</html>

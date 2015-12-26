@@ -1,0 +1,215 @@
+<html>
+    <head>
+        <title></title>
+        <style>
+            body { margin: 0; }
+            canvas { width: 100%; height: 100% }
+        </style>
+    </head>
+    <body>
+        <canvas id='cns' width='500' height='500'
+                style="display: block; height: 500px; width: 500px;"></canvas>
+        <script>
+            var height = 500;
+            var width = 500;
+            var trMesh = function (points) {
+                'use strict';
+                var counter = 0,
+                    sorted = [],
+                    segments = [],
+                    triangles = [],
+                    addSorted = function (point) {
+                        var counter = 0;
+                        while (counter < sorted.length && point.x > sorted[counter].x) {
+                            counter = counter + 1;
+                        }
+                        sorted.splice(counter, 0, point);
+                    },
+                    counterClockWise = function (a, b, c) {
+                        var sum = (b.x - a.x) * (b.y + a.y) + (c.x - b.x) * (c.y + b.y) + (a.x - c.x) * (a.y + c.y);
+                        return sum > 0;
+                    },
+                    segmentsIntersect = function (a, b, c, d) {
+
+                        if ((a.x === c.x && a.y === c.y) || (a.x === d.x && a.y === d.y) || (b.x === c.x && b.y === c.y) || (b.x === d.x && b.y === d.y)) {
+                            return false;
+                        }
+
+                        if (counterClockWise(a, c, d) === counterClockWise(b, c, d)) {
+                            return false;
+                        }
+                        if (counterClockWise(a, b, c) === counterClockWise(a, b, d)) {
+                            return false;
+                        }
+
+                        return true;
+                    },
+                    crossSegments = function (segment) {
+                        var counter = 0,
+                            tmp = [];
+
+                        for (counter = 0; counter < segments.length; counter = counter + 1) {
+                            tmp = segments[counter];
+                            if (segmentsIntersect(segment[0], segment[1], tmp[0], tmp[1])) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    },
+                    segmentExists = function (seg) {
+                        var counter = 0,
+                            tmp = [];
+
+                        for (counter = 0; counter < segments.length; counter = counter + 1) {
+                            tmp = segments[counter];
+                            if ((seg[0].id === tmp[0].id && seg[1].id === tmp[1].id) || (seg[0].id === tmp[1].id && seg[1].id === tmp[0].id)) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    },
+                    differentTriangles = function (trg1, trg2) {
+
+                        if (trg1[0] !== trg2[0] && trg1[0] !== trg2[1] && trg1[0] !== trg2[2]) { return true; }
+                        if (trg1[1] !== trg2[0] && trg1[1] !== trg2[1] && trg1[1] !== trg2[2]) { return true; }
+                        if (trg1[2] !== trg2[0] && trg1[2] !== trg2[1] && trg1[2] !== trg2[2]) { return true; }
+
+                        return false;
+                    },
+                    triangleExists = function (trg) {
+                        var counter = 0,
+                            tmp = [];
+
+                        for (counter = 0; counter < triangles.length; counter = counter + 1) {
+                            tmp = triangles[counter];
+                            if (!differentTriangles(trg, tmp)) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    },
+                    addSegments = function (limit) {
+                        var seg = [],
+                            counter = 0;
+
+                        for (counter = 0; counter < limit; counter = counter + 1) {
+                            seg = [sorted[limit], sorted[counter]];
+                            if (crossSegments(seg) === false) {
+                                segments.push(seg);
+                            }
+                        }
+                    },
+                    addTriangles = function (pos) {
+                        var counterA = 0,
+                            counterB = 0,
+                            pnt = sorted[pos],
+                            seg1 = [],
+                            seg2 = [],
+                            tmp1 = {},
+                            tmp2 = {},
+                            seg = [],
+                            pointSegments = [];
+
+                        for (counterA = 0; counterA < segments.length; counterA = counterA + 1) {
+                            seg = segments[counterA];
+                            if (pnt.id === seg[0].id || pnt.id === seg[1].id) {
+                                pointSegments.push(seg);
+                            }
+                        }
+
+                        for (counterA = 0; counterA < pointSegments.length; counterA = counterA + 1) {
+                            seg1 = pointSegments[counterA];
+                            if (seg1[0].id === pnt.id) {
+                                tmp1 = seg1[1];
+                            } else {
+                                tmp1 = seg1[0];
+                            }
+                            for (counterB = 0; counterB < pointSegments.length; counterB = counterB + 1) {
+                                seg2 = pointSegments[counterB];
+                                if (seg2[0].id === pnt.id) {
+                                    tmp2 = seg2[1];
+                                } else {
+                                    tmp2 = seg2[0];
+                                }
+                                if (segmentExists([tmp1, tmp2])) {
+                                    if (!triangleExists([pnt, tmp1, tmp2])) {
+                                        triangles.push([pnt, tmp1, tmp2]);
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                if (points.length < 3) { return []; }
+                if (points.length === 3) { return [[points[0], points[1], points[2]]]; }
+
+                for (counter = 0; counter < points.length; counter = counter + 1) {
+                    addSorted(points[counter]);
+                }
+
+                segments = [];
+                for (counter = 0; counter < points.length; counter = counter + 1) {
+                    addSegments(counter);
+                }
+
+                triangles = [];
+                for (counter = 0; counter < sorted.length; counter = counter + 1) {
+                    addTriangles(counter);
+                }
+
+                return triangles;
+            };
+            var getRandomPoints = function (points) {
+                'use strict';
+                var counter = 0,
+                    x = 0,
+                    y = 0,
+                    v = 0.0,
+                    rst = [];
+                for (counter = 0; counter < points; counter = counter + 1) {
+                    x = parseInt((Math.random() * 100000) % width, 10);
+                    y = parseInt((Math.random() * 100000) % height, 10);
+                    v = Math.random() * 100;
+                    rst.push({ id: counter, x: x, y: y, v: v });
+                }
+                return rst;
+            };
+            var drawMesh = function (ctx, mesh) {
+                'use strict';
+                var counter = 0,
+                    ptr = null;
+
+                for (counter = 0; counter < mesh.length; counter = counter + 1) {
+                    ptr = mesh[counter];
+                    ctx.beginPath();
+                    ctx.moveTo(ptr[0].x, ptr[0].y);
+                    ctx.lineTo(ptr[1].x, ptr[1].y);
+                    ctx.lineTo(ptr[2].x, ptr[2].y);
+                    ctx.lineTo(ptr[0].x, ptr[0].y);
+                    ctx.stroke();
+                }
+            };
+            var drawPoints = function (ctx, points) {
+                'use strict';
+                var counter = 0,
+                    ptr;
+
+                for (counter = 0; counter < points.length; counter = counter + 1) {
+                    ptr = points[counter];
+                    ctx.beginPath();
+                    ctx.arc(ptr.x, ptr.y, 2, 0, 2 * Math.PI, false);
+                    ctx.fill();
+                    ctx.fillText(ptr.x+":"+ptr.y + "(" + ptr.id + ")", ptr.x, ptr.y);
+                }
+            };
+            var canvas = document.getElementById("cns"),
+                ctx = canvas.getContext("2d"),
+                points = getRandomPoints(15),
+                mesh = trMesh(points);
+            drawMesh(ctx, mesh);
+            drawPoints(ctx, points);
+        </script>
+    </body>
+</html>

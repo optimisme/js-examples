@@ -17,6 +17,12 @@ Example showing how to draw one 3 gradient triangle using the 'canvas' object an
 
 ![canvasTriangleGradient0](https://raw.github.com/optimisme/html-examples/master/captures/canvasTriangleGradient0.png)
 
+### natualSort.html
+
+Example showing how to sort strings with a natural algorithm that looks for numbers inside strings
+
+![naturalSort0](https://raw.github.com/optimisme/html-examples/master/captures/naturalSort0.png)
+
 ### scrollAnimation.html
 
 This example shows how to animate one or various HTML div objects, depending on the scroll position.
