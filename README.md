@@ -11,6 +11,18 @@ cd html-examples
 
 ...
 
+### canvasBuffer.html
+
+Example showing how to draw one canvas pixel by pixel using a fast ArrayBuffer.
+
+![canvasBuffer0](https://raw.github.com/optimisme/html-examples/master/captures/canvasBuffer0.png)
+
+### canvasBufferWorker.html
+
+Example showing how to draw one canvas pixel by pixel using a fast ArrayBuffer from several workers (not OffscrenCanvas).
+
+![canvasBuffer0](https://raw.github.com/optimisme/html-examples/master/captures/canvasBuffer0.png)
+
 ### canvasTriangleGradient.html
 
 Example showing how to draw one 3 gradient triangle using the 'canvas' object and javascript. It is done creating a triangle texture with 3 colors, and projecting this texture to its final position. The resolution of the texture can be configured to improve performance/quality, it also allows the use of RGBA colors.

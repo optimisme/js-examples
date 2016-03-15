@@ -1,0 +1,104 @@
+<html>
+<script>
+/*
+    python -m SimpleHTTPServer
+    http://0.0.0.0:8000/canvasBuffer.html
+
+    From: https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/
+*/
+let isLittleEndian = true,
+    fps = '',
+    cnv = null,
+    ctx = null,
+    pix = null,
+    dat = null,
+    buf = null,
+    b08 = null,
+    b32 = null,
+    cnH = 0,
+    cnW = 0,
+    mov = 0,
+    val = 0,
+    x = 0,
+    y = 0,
+    cA = 0,
+    cR = 0,
+    cG = 0,
+    cB = 0,
+    tB = Date.now(),
+    tE = 0;
+
+function init () {
+
+    cnv = document.getElementById('cnv');
+    cnH = cnv.height;
+    cnW = cnv.width;
+    ctx = cnv.getContext('2d', { alpha: false });
+    pix = ctx.getImageData(0, 0, cnW, cnH);
+    dat = pix.data;
+    buf = new ArrayBuffer(dat.length);
+    b08 = new Uint8ClampedArray(buf);
+    b32 = new Uint32Array(buf);
+
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 16px arial';
+
+    if (buf[4] === 0x0a && buf[5] === 0x0b && buf[6] === 0x0c && buf[7] === 0x0d) {
+        isLittleEndian = false;
+    }
+
+    redraw();
+}
+
+function setColor (x, y) {
+
+    val = (mov + (x * y)) & 0xff;   
+
+    cR = x & 0xff;  // red
+    cG = val;       // green
+    cB = y & 0xff;  // blue
+    cA = 255;       // alpha 
+}
+
+function redraw () {
+
+    tB = Date.now();
+
+    if (isLittleEndian) {
+        for (x = 0; x < cnW; x = x + 1) {
+            for (y = 0; y < cnH; y = y + 1) {
+                setColor(x, y);
+                b32[y * cnW + x] = (cA << 24) | (cB << 16) | (cG << 8) | cR;
+            }
+        }
+    } else {
+        for (x = 0; x < cnW; x = x + 1) {
+            for (y = 0; y < cnH; y = y + 1) {
+                setColor(x, y);
+                b32[y * cnW + x] = (cR << 24) | (cG << 16) | (cB << 8) | cA;
+            }
+        }
+    }
+  
+    dat.set(b08);
+
+    mov = (mov + 1) & 0xff;
+
+    window.requestAnimationFrame((timestamp) => { this.redrawAnimationFrame(timestamp) }, ctx);
+}
+
+function redrawAnimationFrame (timestamp) {
+
+    ctx.putImageData(pix, 0, 0);
+
+    tE = Date.now();
+    fps = parseInt(1000 / (tE - tB), 10).toString();
+    ctx.fillText(fps, 10, 20);
+
+    redraw();
+}
+</script>
+<body onload='init()'>
+<canvas id='cnv' height='720' width='1280'></canvas>
+</body>
+</html>

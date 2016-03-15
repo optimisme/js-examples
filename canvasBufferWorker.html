@@ -1,0 +1,127 @@
+<html>
+<script>
+/*
+    python -m SimpleHTTPServer
+    http://0.0.0.0:8000/canvasBufferWorker.html
+
+    From: https://hacks.mozilla.org/2011/12/faster-canvas-pixel-manipulation-with-typed-arrays/
+*/
+let workers = 4,
+    wSet = [],
+    wDone = [],
+    wList = [],
+    wPos = [],
+    wPix = [],
+    wDat = [],
+    isLittleEndian = true,
+    fps = '',
+    cnv = null,
+    ctx = null,
+    cnH = 0,
+    cnW = 0,
+    mov = 0,
+    tB = Date.now(),
+    tE = 0;
+
+function init () {
+
+    var cnt = 0,
+        ref = null;
+
+    cnv = document.getElementById('cnv');
+    cnH = cnv.height;
+    cnW = cnv.width;
+    ctx = cnv.getContext('2d', { alpha: false });
+
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 16px arial';
+
+    for (cnt = 0; cnt < workers; cnt = cnt + 1) { workerInit(cnt); }
+}
+
+function workerInit (w) {
+
+    var width = parseInt(cnW / workers, 10),
+        pos = w * width;
+
+    wSet[w] = false;
+
+    wList[w] = new Worker("canvasBufferWorker.js");
+    wList[w].addEventListener('message', function (e) {
+        var obj = e.data
+            arr = null;
+
+        if (typeof obj.type !== 'number') {
+            wDat[w].set(new Uint8ClampedArray(e.data)); 
+            wDone[w] = true;
+            ctx.putImageData(wPix[w], wPos[w].x0, 0);
+            redrawReady();
+        } else {
+            wSet[w] = true;
+            redrawInit();
+        }
+
+    }, false);
+
+    wPos[w] = {
+        x0: pos,
+        x1: pos + width,
+        height: cnH
+    };
+
+    wPix[w] = ctx.getImageData(0, 0, width, cnH);
+    wDat[w] = wPix[w].data;
+
+    wList[w].postMessage({
+            type: 1,
+            init: wPos[w]
+        });
+}
+
+function redrawInit () {
+
+    var cnt = 0;
+    for (cnt = 0; cnt < workers; cnt = cnt + 1) { if (wSet[cnt] === false) { return; } }
+
+    redrawCall();
+}
+
+function redrawCall () {
+
+    var cnt = 0;
+
+    tB = Date.now();
+
+    mov = (mov + 1) & 0xff;
+
+    for (cnt = 0; cnt < workers; cnt = cnt + 1) {
+        wDone[cnt] = false;
+        wList[cnt].postMessage({
+                type: 0,
+                id: cnt,
+                mov: mov
+            });
+    }
+}
+
+function redrawReady () {
+
+    var cnt = 0;
+    for (cnt = 0; cnt < workers; cnt = cnt + 1) { if (wDone[cnt] === false) { return; } }
+
+    window.requestAnimationFrame((timestamp) => { redrawAnimationFrame(timestamp) }, ctx);
+}
+
+function redrawAnimationFrame (timestamp) {
+
+    tE = Date.now();
+    fps = parseInt(1000 / (tE - tB), 10).toString();
+    ctx.fillText(fps, 10, 20);
+
+    redrawCall();
+}
+</script>
+<body onload='init()'>
+<canvas id='cnv' height='720' width='1280'></canvas>
+</body>
+</html>
